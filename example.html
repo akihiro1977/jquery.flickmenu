@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>iOS SafariでフリックメニューとPull to RefreshできるjQueryプラグインの習作</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+<meta name="format-detection" content="telephone=no" />
+<link href="my.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<link href="jquery.flickmenu/jquery.flickmenu.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="jquery.flickmenu/jquery.flickmenu-0.0.1.js"></script>
+<script type="text/javascript">
+$(function(){
+	
+	$("#orgMenu").flickmenu({
+		// インラインスクロールさせたいヤツ
+		scrollContents: "#contents",
+		btnNaviOpen:    "#btnNavOpen",
+		// プルダウンリフレッシュする？
+		isPullRefresh:	true,
+		onPullRefresh:	function(){
+			alert("refresh!");
+		}
+	});
+	
+});
+</script>
+</head>
+<body>
+<div id="header"><a id="btnNavOpen"><img src="jquery.flickmenu/btn-menu.png" alt="Menu" width="37" height="27" /></a>HEADERだよ</div>
+<div id="orgMenu">
+  <div class="ttl">タイトル</div>
+  <ul class="nav">
+    <li class="child"><a href="example.html">メニュー１</a></li>
+    <li class="child"><a href="example.html">メニュー１</a></li>
+    <li class="child"><a href="example.html">メニュー１</a></li>
+    <li class="child"><a href="example.html">メニュー１</a></li>
+    <li class="child"><a href="example.html">メニュー１</a></li>
+    <li class="child"><a href="example.html">メニュー１</a></li>
+    <li class="child"><a href="example.html">メニュー１</a></li>
+    <li class="child"><a href="example.html">メニュー１</a></li>
+    <li class="child"><a href="example.html">メニュー１</a></li>
+    <li class="child"><a href="example.html">メニュー１</a></li>
+    <li class="child"><a href="example.html">メニュー１</a></li>
+  </ul>
+  <div class="ttl">タイトル</div>
+  <ul class="nav">
+    <li class="child"><a href="example.html">メニュー２</a></li>
+    <li class="child"><a href="example.html">メニュー２</a></li>
+    <li class="child"><a href="example.html">メニュー２</a></li>
+    <li class="child"><a href="example.html">メニュー２</a></li>
+    <li class="child"><a href="example.html">メニュー２</a></li>
+  </ul>
+</div>
+<div id="contents">
+  <h1>iOS SafariでフリックメニューとPull to RefreshできるjQueryプラグインの習作</h1>
+  <br />
+  ←左方向にフリックするとメニューを開くことができます<br />
+  ↓下に引っ張るとPull to Refreshっぽく。<br />
+  <br />
+  ※Androidではとりあえず動くレベル…<br />
+  <br />
+  あいうえお<br />
+  かきくけこ<br />
+  さしすせそ<br />
+  たちつてと<br />
+  なにぬねの<br />
+  はひふへほ<br />
+  あいうえお<br />
+  かきくけこ<br />
+  さしすせそ<br />
+  たちつてと<br />
+  なにぬねの<br />
+  はひふへほ<br />
+  あいうえお<br />
+  かきくけこ<br />
+  さしすせそ<br />
+  たちつてと<br />
+  なにぬねの<br />
+  はひふへほ<br />
+  <a href="javaScript:$.flickmenu.prototype.slidemenuOn()">リンクでメニューを開いたりもできるますよ</a><br />
+  ←左方向にフリックするとメニューを開くことができます<br />
+  ↓下に引っ張るとPull to Refreshっぽく。<br />
+  あいうえお<br />
+  かきくけこ<br />
+  さしすせそ<br />
+  たちつてと<br />
+  なにぬねの<br />
+  はひふへほ<br />
+  あいうえお<br />
+  かきくけこ<br />
+  さしすせそ<br />
+  たちつてと<br />
+  なにぬねの<br />
+  はひふへほ<br />
+  あいうえお<br />
+  かきくけこ<br />
+  さしすせそ<br />
+  たちつてと<br />
+  なにぬねの<br />
+  はひふへほ<br />
+  ←左方向にフリックするとメニューを開くことができます<br />
+  ↓下に引っ張るとPull to Refreshっぽく。<br />
+  あいうえお<br />
+  かきくけこ<br />
+  さしすせそ<br />
+  たちつてと<br />
+  なにぬねの<br />
+  はひふへほ<br />
+  あいうえお<br />
+  かきくけこ<br />
+  さしすせそ<br />
+  たちつてと<br />
+  なにぬねの<br />
+  はひふへほ<br />
+  あいうえお<br />
+  かきくけこ<br />
+  さしすせそ<br />
+  たちつてと<br />
+  なにぬねの<br />
+  はひふへほ<br />
+  ←左方向にフリックするとメニューを開くことができます<br />
+  ↓下に引っ張るとPull to Refreshっぽく。<br />
+  あいうえお<br />
+  かきくけこ<br />
+  さしすせそ<br />
+  たちつてと<br />
+  なにぬねの<br />
+  はひふへほ<br />
+  あいうえお<br />
+  かきくけこ<br />
+  さしすせそ<br />
+  たちつてと<br />
+  なにぬねの<br />
+  はひふへほ<br />
+  あいうえお<br />
+  かきくけこ<br />
+  さしすせそ<br />
+  たちつてと<br />
+  なにぬねの<br />
+  はひふへほ<br />
+  ←左方向にフリックするとメニューを開くことができます<br />
+  ↓下に引っ張るとPull to Refreshっぽく。<br />
+  あいうえお<br />
+  かきくけこ<br />
+  さしすせそ<br />
+  たちつてと<br />
+  なにぬねの<br />
+  はひふへほ<br />
+  あいうえお<br />
+  かきくけこ<br />
+  さしすせそ<br />
+  たちつてと<br />
+  なにぬねの<br />
+  はひふへほ</div>
+</body>
+</html>
