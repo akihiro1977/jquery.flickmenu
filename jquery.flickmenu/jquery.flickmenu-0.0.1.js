@@ -231,7 +231,8 @@
 						if (dist<44){
 							$("#refreshBox")
 								.text("Pull to refresh")
-								.css("top", dist+"px");
+								.css("top", dist+"px")
+								.show(0);
 							
 							isCanRefresh = false;
 						} else {
@@ -271,6 +272,7 @@
 				} else {
 					$("#refreshBox").stop(true,true).animate({ top: "0px"}, "fast", "swing", function(){
 						isRefreshing = false;
+						$(this).hide(0);
 					});
 				}
 			}
