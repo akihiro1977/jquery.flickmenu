@@ -65,7 +65,13 @@
 		// add pull2refresh box
 		if (_self.options.isPullRefresh){
 			$("#header").before('<div id="refreshBoxWrapper"><div id="refreshBox">リリースして更新</div></div>');
-			$("#refreshBoxWrapper").hide(0);
+			$("#refreshBoxWrapper")
+				.hide(0)
+				.css({
+					height:		$(window).innerHeight(),
+					top:		0
+					//top:		-$("#refreshBoxWrapper").outerHeight() + $("#header").outerHeight()
+				});
 		}
 		
 		// add slide menu
@@ -77,7 +83,10 @@
 			$("#slidemenuWrapper #pageslide").append(menu);
 			menu.show(0);
 		}
-		$("#slidemenuWrapper").hide(0);
+		$("#slidemenuWrapper")
+			.height($(window).innerHeight())
+			.hide(0);
+		$("#slidemenuWrapper #pageslide").height($(window).innerHeight()+1);
 		
 		
 		setTimeout(function(){
@@ -103,11 +112,13 @@
 			-webkit-transform すると #headerのposition:fixedが効かなくなるので以下で代用
 		*/
 		$(window).on("scroll", function(){
+			
+			if (scrollTimer) clearTimeout(scrollTimer);
+			
 			if (
 				$(window).scrollTop()>$("#header").outerHeight() ||
 				$("#header").offset().top!=0
 			){
-				if (scrollTimer) clearTimeout(scrollTimer);
 				scrollTimer = setTimeout(_reviewHeader, 300);
 			}
 		});
@@ -162,10 +173,13 @@
 			
 			if (swipeSensor==true && swipeMode==false && distX>60){
 				swipeMode = true;
-				$("#refreshBoxWrapper:visible").stop(true,false).css({ height: $("#header").outerHeight()}).hide(0);
+				_hideRefreshBox();
 				_reviewHeader();
 			}
 			if (swipeMode==true){
+				
+				//myConsoleLog("swipeMode:true");
+				
 				$("#slidemenuWrapper")
 					.show(0)
 					.css({
@@ -189,12 +203,22 @@
 			} else
 			if (_self.options.isPullRefresh==true && $(window).scrollTop()<=0 && distY<0){
 				
-				var h = -distY/4;
+				var h = -parseInt(distY/3);
+				
+				//myConsoleLog("refreshBoxWrapper:"+h);
 				
 				//$("#scrollWrapper").css("margin-top", ($("#header").outerHeight()+h));
-				$("#refreshBoxWrapper").show(0).css("height", $("#header").outerHeight()+h);
+				$("#refreshBoxWrapper:not(:visible)").show(0);
 				
-				if ($("#refreshBoxWrapper").height() < $("#header").outerHeight()+60){
+				$("#refreshBoxWrapper").css({
+					"-webkit-transition":	"all 0s",
+					"-moz-transition":		"all 0s",
+					'-webkit-transform':	'translate3d(0,' + (-$("#refreshBoxWrapper").outerHeight() + $("#header").outerHeight() + h) + 'px, 0)',
+					'-moz-transform':		'translate(  0,' + (-$("#refreshBoxWrapper").outerHeight() + $("#header").outerHeight() + h) + 'px)'
+					//top: -$("#refreshBoxWrapper").outerHeight() + $("#header").outerHeight() + h
+				});
+				
+				if (h < 60){
 					$("#refreshBox").text("Pull to refresh");
 					isCanRefresh = false;
 				} else {
@@ -210,13 +234,15 @@
 					$(window).scrollTop()>$("#header").outerHeight() ||
 					$("#header").offset().top!=0
 				){
+					
+					//myConsoleLog("header hide");
+					
 					$("#header")
 						.css({
 							"-webkit-transition":	"all 0s",
 							"-moz-transition":		"all 0s",
 							'-webkit-transform':	'translate3d(0, 0, 0)',
 							'-moz-transform':		'translate(0, 0)',
-							opacity:	1,
 							top:		0,
 						});
 				}
@@ -246,12 +272,9 @@
 					}, 1000);
 				} else 
 				if (swipeMode!=true){
-					$("#refreshBoxWrapper")
-						.stop(true,false)
-						.animate({ height: $("#header").outerHeight()}, 300, "swing", function(){
-							isRefreshing = false;
-							$(this).hide(0);
-						});
+					_hideRefreshBox(function(){
+						isRefreshing = false;
+					});
 					$("#scrollWrapper").animate({"margin-top":$("#header").outerHeight()}, 300, "swing");
 				}
 			}
@@ -261,7 +284,6 @@
 				// 1/4程度引っ張ってたらOpen
 				var left = e.originalEvent.changedTouches[0].screenX - touchX;
 				if (-left > $(window).innerWidth()/4){
-				//if (-$("#bodyWrapper").offset().left > $(window).innerWidth()/4){
 					_self.slidemenuOn();
 				} else{
 					_self.slidemenuOff(2);
@@ -291,6 +313,8 @@
 		
 		_reviewHeader = function(){
 			
+			//myConsoleLog("_reviewHeader()");
+			
 			//if ($("#header:visible").offset().top==$(window).scrollTop()){
 			//	return;
 			//}
@@ -299,7 +323,6 @@
 				.one("webkitTransitionEnd transitionend",function(){
 					$("#header")
 						.css({
-							opacity:	1,
 							"-webkit-transition":	"all 0.1s ease-out",
 							"-moz-transition":		"all 0.1s ease-out",
 							'-webkit-transform':	'translate3d(0, '+$("#header").outerHeight()+'px, 0)',
@@ -313,6 +336,23 @@
 					'-moz-transform':		'translate(  0, 0)',
 					position:	"absolute",
 					top:		$(window).scrollTop() - $("#header").outerHeight(),
+				});
+		};
+		
+		_hideRefreshBox = function(callback){
+			
+			//myConsoleLog("_hideRefreshBox()");
+			
+			$("#refreshBoxWrapper")
+				.one("webkitTransitionEnd transitionend",function(){
+					$("#refreshBoxWrapper").hide(0);
+					if (callback) callback();
+				})
+				.css({
+					"-webkit-transition":	"all 0.3s ease-out",
+					"-moz-transition":		"all 0.3s ease-out",
+					'-webkit-transform':	'translate3d(0,' + (-$("#refreshBoxWrapper").outerHeight() + $("#header").outerHeight()) + 'px, 0)',
+					'-moz-transform':		'translate(  0,' + (-$("#refreshBoxWrapper").outerHeight() + $("#header").outerHeight()) + 'px)'
 				});
 		};
 		
@@ -361,7 +401,9 @@
 							top:					0,
 						});
 					
-					//_reviewHeader();
+					_reviewHeader();
+					
+					/*
 					$("#header")
 						.css({
 							"-webkit-transition":	"all 0s",
@@ -371,7 +413,7 @@
 							position:	"absolute",
 							top:		$(window).scrollTop(),
 						});
-					
+					*/
 					// 念押し
 					$("#slidemenuWrapper")
 						.css({
