@@ -92,7 +92,13 @@
 		setTimeout(function(){
 			window.scrollTo(0, 0);
 			$("#scrollWrapper").css('margin-top', $("#header").outerHeight());
-			_reviewHeader();
+					$("#header")
+						.css({
+							"-webkit-transition":	"all 0s",
+							"-moz-transition":		"all 0s",
+							'-webkit-transform':	'translate3d(0, 0, 0)',
+							'-moz-transform':		'translate(  0, 0px)',
+						});
 		}, 100);
 		
 		
@@ -174,7 +180,16 @@
 			if (swipeSensor==true && swipeMode==false && distX>60){
 				swipeMode = true;
 				_hideRefreshBox();
-				_reviewHeader();
+				//_reviewHeader();
+					$("#header")
+						.css({
+							"-webkit-transition":	"all 0s",
+							"-moz-transition":		"all 0s",
+							'-webkit-transform':	'translate3d(0, 0, 0)',
+							'-moz-transform':		'translate(  0, 0)',
+							position:	"absolute",
+							top:		$(window).scrollTop(),
+						});
 			}
 			if (swipeMode==true){
 				
@@ -401,9 +416,6 @@
 							top:					0,
 						});
 					
-					_reviewHeader();
-					
-					/*
 					$("#header")
 						.css({
 							"-webkit-transition":	"all 0s",
@@ -413,7 +425,7 @@
 							position:	"absolute",
 							top:		$(window).scrollTop(),
 						});
-					*/
+					
 					// 念押し
 					$("#slidemenuWrapper")
 						.css({
