@@ -1,7 +1,7 @@
 @charset "utf-8";
 #bodyWrapper {
 	-webkit-box-shadow: 0 0 15px rgba(0,0,0,0.9);
-	-moz-shadow: 0 0 15px rgba(0,0,0,0.9);
+	-moz-box-shadow: 0 0 15px rgba(0,0,0,0.9);
 	box-shadow: 0 0 15px rgba(0,0,0,0.9);
 	background-color: #FFFFFF;
 	/*
@@ -21,13 +21,18 @@
 
 
 #refreshBoxWrapper {
-	background-color: #D5E8FF;
+	background-color: #DDDDDD;
 	display: block;
-	width: 100%;
 	position: absolute;
 	z-index: 99900;
 	left: 0px;
 	top: 0px;
+	-webkit-box-shadow: 0 5px 5px rgba(0,0,0,0.33);
+	-moz-box-shadow: 0 5px 5px rgba(0,0,0,0.33);
+	box-shadow: 0 5px 5px rgba(0,0,0,0.33);
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
 }
 #refreshBoxWrapper #refreshBox{
 	text-align: center;

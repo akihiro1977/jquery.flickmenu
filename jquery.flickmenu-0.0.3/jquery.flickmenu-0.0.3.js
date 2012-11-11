@@ -64,14 +64,15 @@
 		
 		// add pull2refresh box
 		if (_self.options.isPullRefresh){
-			$("#header").before('<div id="refreshBoxWrapper"><div id="refreshBox">リリースして更新</div></div>');
+			$("#header").before('<div id="refreshBoxWrapper"><div id="refreshBox"></div></div>');
 			$("#refreshBoxWrapper")
-				.hide(0)
 				.css({
+					width:		$(window).innerWidth()-20,
 					height:		$(window).innerHeight(),
-					top:		0
-					//top:		-$("#refreshBoxWrapper").outerHeight() + $("#header").outerHeight()
-				});
+					top:		0,
+					left:		10,
+				})
+				.hide(0);
 		}
 		
 		// add slide menu
@@ -219,27 +220,27 @@
 			if (_self.options.isPullRefresh==true && $(window).scrollTop()<=0 && distY<0){
 				
 				var h = -parseInt(distY/3);
+				var h2 = -$("#refreshBoxWrapper").outerHeight() + $("#header").outerHeight() + h - 10;// 10:shadow
 				
 				//myConsoleLog("refreshBoxWrapper:"+h);
-				
-				//$("#scrollWrapper").css("margin-top", ($("#header").outerHeight()+h));
-				$("#refreshBoxWrapper:not(:visible)").show(0);
-				
-				$("#refreshBoxWrapper").css({
-					"-webkit-transition":	"all 0s",
-					"-moz-transition":		"all 0s",
-					'-webkit-transform':	'translate3d(0,' + (-$("#refreshBoxWrapper").outerHeight() + $("#header").outerHeight() + h) + 'px, 0)',
-					'-moz-transform':		'translate(  0,' + (-$("#refreshBoxWrapper").outerHeight() + $("#header").outerHeight() + h) + 'px)'
-					//top: -$("#refreshBoxWrapper").outerHeight() + $("#header").outerHeight() + h
-				});
+				//$("#refreshBox").text(h2);
 				
 				if (h < 60){
-					$("#refreshBox").text("Pull to refresh");
+					$("#refreshBoxWrapper #refreshBox").text("Pull to refresh");
 					isCanRefresh = false;
 				} else {
-					$("#refreshBox").text("Release to refresh");
+					$("#refreshBoxWrapper #refreshBox").text("Release to refresh");
 					isCanRefresh = true;
 				}
+				
+				$("#refreshBoxWrapper").css({
+					"-webkit-transition":	"all 0.05s",
+					"-moz-transition":		"all 0.05s",
+					'-webkit-transform':	'translate3d(0,' + h2 + 'px, 0)',
+					'-moz-transform':		'translate(  0,' + h2 + 'px)'
+				});
+				$("#refreshBoxWrapper:not(:visible)").show(0);
+				
 				
 				e.preventDefault();
 				
@@ -290,7 +291,7 @@
 					_hideRefreshBox(function(){
 						isRefreshing = false;
 					});
-					$("#scrollWrapper").animate({"margin-top":$("#header").outerHeight()}, 300, "swing");
+					//$("#scrollWrapper").animate({"margin-top":$("#header").outerHeight()}, 300, "swing");
 				}
 			}
 			
@@ -357,6 +358,7 @@
 		_hideRefreshBox = function(callback){
 			
 			//myConsoleLog("_hideRefreshBox()");
+			var y = -$("#refreshBoxWrapper").outerHeight() + $("#header").outerHeight() - 10;//10:shadow
 			
 			$("#refreshBoxWrapper")
 				.one("webkitTransitionEnd transitionend",function(){
@@ -366,8 +368,8 @@
 				.css({
 					"-webkit-transition":	"all 0.3s ease-out",
 					"-moz-transition":		"all 0.3s ease-out",
-					'-webkit-transform':	'translate3d(0,' + (-$("#refreshBoxWrapper").outerHeight() + $("#header").outerHeight()) + 'px, 0)',
-					'-moz-transform':		'translate(  0,' + (-$("#refreshBoxWrapper").outerHeight() + $("#header").outerHeight()) + 'px)'
+					'-webkit-transform':	'translate3d(0,' + y + 'px, 0)',
+					'-moz-transform':		'translate(  0,' + y + 'px)'
 				});
 		};
 		
@@ -390,12 +392,6 @@
 			
 			
 			$("#bodyWrapper")
-				.css({
-					margin: 0,
-					left:	0,
-					"-webkit-transition":	"all 0.2s ease-out",
-					"-moz-transition":		"all 0.2s ease-out",
-				})
 				.one("webkitTransitionEnd transitionend",function(){
 					$("#bodyWrapper")
 						.css({
@@ -431,9 +427,14 @@
 						.css({
 							height:			window.innerHeight,
 							"margin-top":	$(window).scrollTop(),
-						});
+						})
+						.scrollTop(1);
 				})
 				.css({
+					margin: 0,
+					left:	0,
+					"-webkit-transition":	"all 0.2s ease-out",
+					"-moz-transition":		"all 0.2s ease-out",
 					'-webkit-transform':'translate3d(-'+$("#slidemenuWrapper").outerWidth()+'px, 0, 0)',
 					'-moz-transform':	'translate(-'  +$("#slidemenuWrapper").outerWidth()+'px, 0)'
 				});
