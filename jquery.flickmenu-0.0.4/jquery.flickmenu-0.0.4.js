@@ -7,10 +7,6 @@
 
 ;(function ( $, window, undefined ) {
     
-	var IS_ANDROID = (/android/gi).test(navigator.appVersion);
-	var IS_IOS4    = navigator.userAgent.match(/OS 4_[0-9_]+ like Mac OS X/i) !== null;
-	var IS_IOS5    = navigator.userAgent.match(/OS 5_[0-9_]+ like Mac OS X/i) !== null;
-	var IS_IOS6    = navigator.userAgent.match(/OS 6_[0-9_]+ like Mac OS X/i) !== null;
 	
 	// スライドメニューを開いているフラグ
 	var IS_MENUOPEN = false;
@@ -32,11 +28,11 @@
 		// init
 		
 		var defaults = {
-			scrollContents:	null,
-			btnNaviOpen: null,
-			// プルダウンリフレッシュ有効？
-			isPullRefresh: true,
-			onPullRefresh:	function(){},
+			menuOpen:    null,
+			isPullRefresh:  true,
+			onPullRefresh:  function(){},
+			fixedHeader:	null,
+			isFlickMenu:    true
         }
         this.options = $.extend( {}, defaults, options) ;
 		
@@ -45,66 +41,104 @@
 		var _self = this;
 		
 		// body wrap
-		$("body").wrapInner('<div id="bodyWrapper"></div>');
-		$("#bodyWrapper").css({
+		$("body").wrapInner('<div id="fmBodyWrapper"></div>');
+		$("#fmBodyWrapper").css({
 			width:		$(window).innerWidth(),
 			overflow:	"hidden",
+			background:	$("body").css("background") || $("body").css("background-color") || "#FFFFFF"
 		});
-		
 		// ちらつき防止
-		$("#bodyWrapper, #header").css({
+		$("#fmBodyWrapper").css({
 			"-webkit-transform":	"translate3d(0,0,0)",
-			"-moz-transform":		"translate(0, 0)",
+			"-moz-transform":		"translate(0, 0)"
 		});
-		
-		// contents scroll
-		if (_self.options.scrollContents){
-			$(_self.options.scrollContents).wrap('<div id="scrollWrapper"></div>');
+		if (_self.options.fixedHeader){
+			$(_self.options.fixedHeader).css({
+				"-webkit-transform":	"translate3d(0,0,0)",
+				"-moz-transform":		"translate(0, 0)",
+				top:					0,
+				left:					0,
+				position:				"absolute",
+				width:					"100%",
+				"z-index":				99999,
+			});
 		}
 		
 		// add pull2refresh box
 		if (_self.options.isPullRefresh){
-			$("#header").before('<div id="refreshBoxWrapper"><div id="refreshBox"></div></div>');
+			$("body").prepend('<div id="refreshBoxWrapper"><div id="refreshBox"></div></div>');
 			$("#refreshBoxWrapper")
 				.css({
+					position:	"absolute",
 					width:		$(window).innerWidth()-20,
-					height:		$(window).innerHeight(),
+					height:		window.innerHeight,
 					top:		0,
 					left:		10,
+					display:	"block",
+					"z-index":	99900,
+					left:		0,
+					top:		0
 				})
 				.hide(0);
 		}
-		
+
 		// add slide menu
-		$("body").append('<div id="slidemenuWrapper"><div id="pageslide"></div></div>');
+		$("body").append('<div id="fmSlidemenuWrapper"><div id="pageslide"></div></div>');
 		if (this.element != null){
 			// copy menu
 			var menu = $(this.element).clone();
 			$(this.element).remove();
-			$("#slidemenuWrapper #pageslide").append(menu);
+			$("#fmSlidemenuWrapper #pageslide").append(menu);
 			menu.show(0);
 		}
-		$("#slidemenuWrapper")
-			.height($(window).innerHeight())
-			.hide(0);
-		$("#slidemenuWrapper #pageslide").height($(window).innerHeight()+1);
+		
+		// init
+		$.flickmenu.prototype.slidemenuInit();
+		$("#fmSlidemenuWrapper").hide(0);
+		
+		$("#fmSlidemenuWrapper a").on("click", function(e){
+			if ($(this).attr("href").match(/javascript/i)){
+			} else {
+				(function(url){
+					
+					var returnLeft = -$("#fmBodyWrapper").offset().left;
+					
+					$("#fmBodyWrapper")
+						.one("webkitTransitionEnd transitionend",function(){
+							$("#fmSlidemenuWrapper").hide(0);
+							$(this).fadeOut(200, function(){
+								location.href = url;
+							})
+						})
+						.css({
+							"-webkit-transition":	"all 0.2s ease-out",
+							"-moz-transition":		"all 0.2s ease-out",
+							'-webkit-transform':	'translate3d('+returnLeft+'px, 0, 0)',
+							'-moz-transform':		'translate('+returnLeft+'px, 0)'
+						});
+				})($(this).attr("href"));
+				
+				e.preventDefault();
+			}
+		});
 		
 		
 		setTimeout(function(){
 			window.scrollTo(0, 0);
-			$("#scrollWrapper").css('margin-top', $("#header").outerHeight());
-					$("#header")
-						.css({
-							"-webkit-transition":	"all 0s",
-							"-moz-transition":		"all 0s",
-							'-webkit-transform':	'translate3d(0, 0, 0)',
-							'-moz-transform':		'translate(  0, 0px)',
-						});
+			if (_self.options.fixedHeader){
+				$(_self.options.fixedHeader)
+					.css({
+						"-webkit-transition":	"all 0s",
+						"-moz-transition":		"all 0s",
+						'-webkit-transform':	'translate3d(0, 0, 0)',
+						'-moz-transform':		'translate(  0, 0px)',
+					});
+			}
 		}, 100);
 		
 		
 		
-		$("#slidemenuWrapper").on("scroll", function(e){
+		$("#fmSlidemenuWrapper").on("scroll", function(e){
 			if ($(this).scrollTop()==0){
 				$(this).scrollTop(1);
 			}
@@ -116,43 +150,33 @@
 		
 		
 		/*
-			-webkit-transform すると #headerのposition:fixedが効かなくなるので以下で代用
+			-webkit-transform すると ヘッダのposition:fixedが効かなくなるので以下で代用
 		*/
-		$(window).on("scroll", function(){
-			
-			// 間引いてみるテスト
-			//if (Math.random()>0.666) return;
-			
-			if (scrollTimer) clearTimeout(scrollTimer);
-			
-			if (
-				$(window).scrollTop()>$("#header").outerHeight() ||
-				$("#header").offset().top!=0
-			){
-				scrollTimer = setTimeout(_reviewHeader, 300);
-			}
-		});
+		if (_self.options.fixedHeader){
+			$(window).on("scroll", function(){
+				
+				if (scrollTimer) clearTimeout(scrollTimer);
+				
+				if (
+					$(window).scrollTop()>$(_self.options.fixedHeader).outerHeight() ||
+					$(_self.options.fixedHeader).offset().top!=0
+				){
+					scrollTimer = setTimeout(_reviewHeader, 300);
+				}
+			});
+		}
 		
-		
-		$("#scrollWrapper").on("touchstart", function(e){
+		$("#fmBodyWrapper").on("touchstart", function(e){
 			
-			//if (IS_ANDROID) return;
 			if (IS_MENUOPEN){
 				e.preventDefault();
 				return;
 			}
 			
-			/* アプリ版では要らない？
-			if ($(window).scrollTop()<=0){
-				window.scrollTo(0, 0);
-			}
-			*/
-			
-			$("#bodyWrapper")
+			$("#fmBodyWrapper")
 				.css({
 					width:		$(window).innerWidth(),
 				});
-			$("#scrollWrapper").css('margin-top', $("#header").outerHeight());
 			
 			
 			if (isRefreshing==true) return;
@@ -162,16 +186,18 @@
 				touchX = e.originalEvent.targetTouches[0].screenX;
 			}
 			
-			swipeSensor = true;
-			setTimeout(function(){
-				swipeSensor = false;
-			}, 150);
+			if (_self.options.isFlickMenu==true){
+				swipeSensor = true;
+				setTimeout(function(){
+					swipeSensor = false;
+				}, 150);
+			}
 			
 			$("#refreshBox").text("Pull to refresh");
 			
 		});
 		
-		$("#scrollWrapper").on("touchmove", function(e){
+		$("#fmBodyWrapper").on("touchmove", function(e){
 			
 			if (isRefreshing==true) return;
 			
@@ -187,7 +213,8 @@
 				swipeMode = true;
 				_hideRefreshBox();
 				//_reviewHeader();
-					$("#header")
+				if (_self.options.fixedHeader){
+					$(_self.options.fixedHeader)
 						.css({
 							"-webkit-transition":	"all 0s",
 							"-moz-transition":		"all 0s",
@@ -196,21 +223,17 @@
 							position:	"absolute",
 							top:		$(window).scrollTop(),
 						});
+				}
 			}
 			if (swipeMode==true){
 				
 				//myConsoleLog("swipeMode:true");
 				
-				$("#slidemenuWrapper")
-					.show(0)
-					.css({
-						"margin-top":	$(window).scrollTop(),
-					})
-					.scrollTop(1);
+				$.flickmenu.prototype.slidemenuInit();
 				
 				var left = e.originalEvent.targetTouches[0].screenX - touchX;
 				if (left>0) left = 0;
-				$("#bodyWrapper")
+				$("#fmBodyWrapper")
 					.css({
 						margin:					0,
 						"-webkit-transition":	"all 0.01s ease-out",
@@ -222,10 +245,11 @@
 				e.preventDefault();
 				
 			} else
-			if (_self.options.isPullRefresh==true && $(window).scrollTop()<=0 && distY<0){
+			if (_self.options.isPullRefresh==true && $(window).scrollTop()<=0 && distY<0 && _self.options.fixedHeader){
+				// refreshBox
 				
 				var h = -parseInt(distY/3);
-				var h2 = -$("#refreshBoxWrapper").outerHeight() + $("#header").outerHeight() + h - 10;// 10:shadow
+				var h2 = -$("#refreshBoxWrapper").outerHeight() + $(_self.options.fixedHeader).outerHeight() + h - 10;// 10:shadow
 				
 				//myConsoleLog("refreshBoxWrapper:"+h);
 				//$("#refreshBox").text(h2);
@@ -252,13 +276,13 @@
 			} else {
 				
 				if (
-					$(window).scrollTop()>$("#header").outerHeight() ||
-					$("#header").offset().top!=0
+					_self.options.fixedHeader &&
+					( $(window).scrollTop()>$(_self.options.fixedHeader).outerHeight() || $(_self.options.fixedHeader).offset().top!=0 )
 				){
 					
 					//myConsoleLog("header hide");
 					
-					$("#header")
+					$(_self.options.fixedHeader)
 						.css({
 							"-webkit-transition":	"all 0s",
 							"-moz-transition":		"all 0s",
@@ -272,7 +296,7 @@
 			
 		});
 		
-		$("#scrollWrapper").on("touchend", function(e){
+		$("#fmBodyWrapper").on("touchend", function(e){
 			
 			if (IS_MENUOPEN){
 				_self.slidemenuOff();
@@ -289,14 +313,13 @@
 					
 					setTimeout(function(){
 						isCanRefresh = false;
-						$("#scrollWrapper").trigger("touchend");
+						$("#fmBodyWrapper").trigger("touchend");
 					}, 1000);
 				} else 
 				if (swipeMode!=true){
 					_hideRefreshBox(function(){
 						isRefreshing = false;
 					});
-					//$("#scrollWrapper").animate({"margin-top":$("#header").outerHeight()}, 300, "swing");
 				}
 			}
 			
@@ -313,7 +336,7 @@
 			}
 		});
 		
-		$("#scrollWrapper")
+		$("#fmBodyWrapper")
 			.on("click", function(e){
 				if (IS_MENUOPEN){
 					e.preventDefault();
@@ -321,61 +344,60 @@
 			});
 		
 		// open side navi
-		if (_self.options.btnNaviOpen){
-			$(_self.options.btnNaviOpen).on("touchend", function(e){
+		if (_self.options.menuOpen){
+			$(_self.options.menuOpen).on("touchend", function(e){
 				if (IS_MENUOPEN){
 					_self.slidemenuOff();
 				} else {
 					_self.slidemenuOn();
 				}
 				e.preventDefault();
+				e.stopPropagation();
 			});
 		}
 		
 		_reviewHeader = function(){
 			
-			//myConsoleLog("_reviewHeader()");
-			
-			//if ($("#header:visible").offset().top==$(window).scrollTop()){
-			//	return;
-			//}
-			
-			$("#header")
-				.one("webkitTransitionEnd transitionend",function(){
-					$("#header")
-						.css({
-							"-webkit-transition":	"all 0.1s ease-out",
-							"-moz-transition":		"all 0.1s ease-out",
-							'-webkit-transform':	'translate3d(0, '+$("#header").outerHeight()+'px, 0)',
-							'-moz-transform':		'translate(  0, '+$("#header").outerHeight()+'px)',
-						});
-				})
-				.css({
-					"-webkit-transition":	"all 0.01s",
-					"-moz-transition":		"all 0.01s",
-					'-webkit-transform':	'translate3d(0, 0, 0)',
-					'-moz-transform':		'translate(  0, 0)',
-					position:	"absolute",
-					top:		$(window).scrollTop() - $("#header").outerHeight(),
-				});
+			if (_self.options.fixedHeader){
+				$(_self.options.fixedHeader)
+					.one("webkitTransitionEnd transitionend",function(){
+						$(_self.options.fixedHeader)
+							.css({
+								"-webkit-transition":	"all 0.1s ease-out",
+								"-moz-transition":		"all 0.1s ease-out",
+								'-webkit-transform':	'translate3d(0, '+$(_self.options.fixedHeader).outerHeight()+'px, 0)',
+								'-moz-transform':		'translate(  0, '+$(_self.options.fixedHeader).outerHeight()+'px)',
+							});
+					})
+					.css({
+						"-webkit-transition":	"all 0.01s",
+						"-moz-transition":		"all 0.01s",
+						'-webkit-transform':	'translate3d(0, 0, 0)',
+						'-moz-transform':		'translate(  0, 0)',
+						position:	"absolute",
+						top:		$(window).scrollTop() - $(_self.options.fixedHeader).outerHeight(),
+					});
+			}
 		};
 		
 		_hideRefreshBox = function(callback){
 			
 			//myConsoleLog("_hideRefreshBox()");
-			var y = -$("#refreshBoxWrapper").outerHeight() + $("#header").outerHeight() - 10;//10:shadow
-			
-			$("#refreshBoxWrapper:visible")
-				.one("webkitTransitionEnd transitionend",function(){
-					$("#refreshBoxWrapper").hide(0);
-					if (callback) callback();
-				})
-				.css({
-					"-webkit-transition":	"all 0.3s ease-out",
-					"-moz-transition":		"all 0.3s ease-out",
-					'-webkit-transform':	'translate3d(0,' + y + 'px, 0)',
-					'-moz-transform':		'translate(  0,' + y + 'px)'
-				});
+			if (_self.options.fixedHeader){
+				var y = -$("#refreshBoxWrapper").outerHeight() + $(_self.options.fixedHeader).outerHeight() - 10;//10:shadow
+				
+				$("#refreshBoxWrapper:visible")
+					.one("webkitTransitionEnd transitionend",function(){
+						$("#refreshBoxWrapper").hide(0);
+						if (callback) callback();
+					})
+					.css({
+						"-webkit-transition":	"all 0.3s ease-out",
+						"-moz-transition":		"all 0.3s ease-out",
+						'-webkit-transform':	'translate3d(0,' + y + 'px, 0)',
+						'-moz-transform':		'translate(  0,' + y + 'px)'
+					});
+			}
 		};
 		
 	}
@@ -385,20 +407,11 @@
 			
 			IS_MENUOPEN = true;
 			
-			$("#slidemenuWrapper")
-				.show(0, function(){
-					$(this)
-					.css({
-						height:			window.innerHeight,
-						"margin-top":	$(window).scrollTop(),
-					})
-				})
-				.scrollTop(1);
+			$.flickmenu.prototype.slidemenuInit();
 			
-			
-			$("#bodyWrapper")
+			$("#fmBodyWrapper")
 				.one("webkitTransitionEnd transitionend",function(){
-					$("#bodyWrapper")
+					$("#fmBodyWrapper")
 						.css({
 								// リセットするとちらつくためリセットNG
 								//'-webkit-transition': '',
@@ -412,36 +425,34 @@
 							'-webkit-transform':	'translate3d(0, 0, 0)',
 							'-moz-transform':		'translate(0, 0)',
 							position: 				"absolute",
-							left: 					-$("#slidemenuWrapper").outerWidth(),
+							left: 					-$("#fmSlidemenuWrapper").width(),
 							right:					"auto",
-							top:					0,
+							top:					0
 						});
-					
-					$("#header")
-						.css({
-							"-webkit-transition":	"all 0s",
-							"-moz-transition":		"all 0s",
-							'-webkit-transform':	'translate3d(0, 0, 0)',
-							'-moz-transform':		'translate(  0, 0)',
-							position:	"absolute",
-							top:		$(window).scrollTop(),
-						});
-					
+					/*
+					if (_self.options.fixedHeader){
+						$(_self.options.fixedHeader)
+							.css({
+								"-webkit-transition":	"all 0s",
+								"-moz-transition":		"all 0s",
+								'-webkit-transform':	'translate3d(0, 0, 0)',
+								'-moz-transform':		'translate(  0, 0)',
+								position:	"absolute",
+								top:		$(window).scrollTop(),
+							});
+					}
+					*/
 					// 念押し
-					$("#slidemenuWrapper")
-						.css({
-							height:			window.innerHeight,
-							"margin-top":	$(window).scrollTop(),
-						})
-						.scrollTop(1);
+					$.flickmenu.prototype.slidemenuInit();
+					
 				})
 				.css({
 					margin: 0,
 					left:	0,
 					"-webkit-transition":	"all 0.2s ease-out",
 					"-moz-transition":		"all 0.2s ease-out",
-					'-webkit-transform':'translate3d(-'+$("#slidemenuWrapper").outerWidth()+'px, 0, 0)',
-					'-moz-transform':	'translate(-'  +$("#slidemenuWrapper").outerWidth()+'px, 0)'
+					'-webkit-transform':'translate3d(-'+$("#fmSlidemenuWrapper").width()+'px, 0, 0)',
+					'-moz-transform':	'translate(-'  +$("#fmSlidemenuWrapper").width()+'px, 0)'
 				});
 			
 		},
@@ -453,15 +464,15 @@
 				returnLeft = 0;
 			} else {
 				// ボタンで開いた時
-				returnLeft = -$("#bodyWrapper").offset().left;
+				returnLeft = -$("#fmBodyWrapper").offset().left;
 			}
 			
-			$("#bodyWrapper")
+			$("#fmBodyWrapper")
 				.one("webkitTransitionEnd transitionend",function(){
 					
-					$("#slidemenuWrapper").hide(0);
+					$("#fmSlidemenuWrapper").hide(0);
 					
-					$("#bodyWrapper")
+					$("#fmBodyWrapper")
 						.css({
 								// リセットするとちらつくためリセットNG
 								//'-webkit-transition': '',
@@ -478,20 +489,19 @@
 						});
 					
 					//_reviewHeader();
-					$("#header")
-						.css({
-							"-webkit-transition":	"all 0s",
-							"-moz-transition":		"all 0s",
-							'-webkit-transform':	'translate3d(0, 0, 0)',
-							'-moz-transform':		'translate(  0, 0)',
-							position:	"absolute",
-							top:		$(window).scrollTop(),
-						});
-					
-					$("#scrollWrapper").css({
-						position:		"static",
-						"margin-top":	$("#header").outerHeight()
-					});
+					/*
+					if (_self.options.fixedHeader){
+						$(_self.options.fixedHeader)
+							.css({
+								"-webkit-transition":	"all 0s",
+								"-moz-transition":		"all 0s",
+								'-webkit-transform':	'translate3d(0, 0, 0)',
+								'-moz-transform':		'translate(  0, 0)',
+								position:	"absolute",
+								top:		$(window).scrollTop(),
+							});
+					}
+					*/
 					IS_MENUOPEN = false;
 					
 				})
@@ -502,6 +512,39 @@
 					'-moz-transform':		'translate('+returnLeft+'px, 0)'
 				});
 			
+		},
+		slidemenuInit : function(){
+			$("#fmSlidemenuWrapper").show(0, function(){
+//				setTimeout(function(){
+					$("#fmSlidemenuWrapper")
+						.css({
+							display:						"block",
+							"z-index":						-9999,
+							position:						"absolute",
+							left:							"auto",
+							top:							0,
+							right:							0,
+							height:							window.innerHeight,
+							"-webkit-touch-callout":		"none",
+							"-moz-touch-callout":			"none",
+							"touch-callout":				"none",
+							"overflow-y":					"scroll",
+							"-webkit-overflow-scrolling":	"touch",
+							"overflow-scrolling":			"touch",
+							"margin-top":					$(window).scrollTop()
+						}).
+						scrollTop(1);
+					$("#fmSlidemenuWrapper #pageslide")
+						.css({
+							display:	"block",
+							width:		$("#fmSlidemenuWrapper").width(),
+							padding:	0,
+							color:		"#C9BEAA",
+							"font-size":"15px",
+							"min-height": $("#fmSlidemenuWrapper").innerHeight()+2
+						});
+//				}, 0);
+			});
 		}
 	});
 	

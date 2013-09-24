@@ -1,38 +1,14 @@
 @charset "utf-8";
-#bodyWrapper {
-	-webkit-box-shadow: 0 0 15px rgba(0,0,0,0.9);
-	-moz-box-shadow: 0 0 15px rgba(0,0,0,0.9);
-	box-shadow: 0 0 15px rgba(0,0,0,0.9);
-	background-color: #FFFFFF;
-	/*
-	position: static;
-	*/
-	z-index: 9999;
-	position: static;
-}
-
-#header {
-	position: absolute;
-	left: 0px;
-	top: 0px;
-	z-index: 99999;
-	width: 100%;
-}
 
 
 #refreshBoxWrapper {
-	display: block;
-	position: absolute;
-	z-index: 99900;
-	left: 0px;
-	top: 0px;
 	-webkit-box-shadow: 0 5px 5px rgba(0,0,0,0.33);
 	-moz-box-shadow: 0 5px 5px rgba(0,0,0,0.33);
 	box-shadow: 0 5px 5px rgba(0,0,0,0.33);
 	-webkit-border-radius: 4px;
 	-moz-border-radius: 4px;
 	border-radius: 4px;
-	background-image: url(../../images/bg-gray.jpg);
+	background-image: url(bg-gray.jpg);
 	background-repeat: repeat;
 	background-size: 100px 100px;
 	background-color: #333;
@@ -51,12 +27,17 @@
 	width: 100%;
 }
 
-#scrollWrapper {
-	margin: 0px;
+#fmSlidemenuWrapper {
+	height:	100%;
+	width: 260px;
+	background-image: url(bg-gray.jpg);
+	background-repeat: repeat;
+	background-size: 100px 100px;
+	background-color: #333;
 	padding: 0px;
-	position: static;
 }
-#slidemenuWrapper {
+/*
+#fmSlidemenuWrapper {
 	z-index: -9999;
 	position: absolute;
 	left: auto;
@@ -70,21 +51,18 @@
 	background-size: 100px 100px;
 	background-color: #333;
 	padding: 0px;
-	/* 長タップでせり上がってくるダイアログを無効にする aタグにつけるのかな？ */
 	-webkit-touch-callout: none;
 	-moz-touch-callout: none;
 	touch-callout: none;
 }
-#slidemenuWrapper #pageslide {
-	/* These styles MUST be included. Do not change. */
+#fmSlidemenuWrapper #pageslide {
     display: block;
-	/* Specify the width of your pageslide here */
     width: 260px;
 	padding: 0px;
-	/* These styles are optional, and describe how the pageslide will look */
 	color: #C9BEAA;
 	font-size: 15px;
 }
+*/
 #pageslide .ttl {
 	padding-left: 15px;
 	font-weight: bold;
