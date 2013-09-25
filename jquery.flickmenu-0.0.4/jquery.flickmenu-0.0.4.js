@@ -43,6 +43,7 @@
 		// body wrap
 		$("body").wrapInner('<div id="fmBodyWrapper"></div>');
 		$("#fmBodyWrapper").css({
+			position:	"relative",
 			width:		$(window).innerWidth(),
 			overflow:	"hidden",
 			background:	$("body").css("background") || $("body").css("background-color") || "#FFFFFF"
@@ -66,7 +67,7 @@
 		
 		// add pull2refresh box
 		if (_self.options.isPullRefresh){
-			$("body").prepend('<div id="refreshBoxWrapper"><div id="refreshBox"></div></div>');
+			$("#fmBodyWrapper").prepend('<div id="refreshBoxWrapper"><div id="refreshBox"></div></div>');
 			$("#refreshBoxWrapper")
 				.css({
 					position:	"absolute",
@@ -75,9 +76,7 @@
 					top:		0,
 					left:		10,
 					display:	"block",
-					"z-index":	99900,
-					left:		0,
-					top:		0
+					"z-index":	99900
 				})
 				.hide(0);
 		}
@@ -245,11 +244,16 @@
 				e.preventDefault();
 				
 			} else
-			if (_self.options.isPullRefresh==true && $(window).scrollTop()<=0 && distY<0 && _self.options.fixedHeader){
+			if (_self.options.isPullRefresh==true && $(window).scrollTop()<=0 && distY<0){
 				// refreshBox
 				
 				var h = -parseInt(distY/3);
-				var h2 = -$("#refreshBoxWrapper").outerHeight() + $(_self.options.fixedHeader).outerHeight() + h - 10;// 10:shadow
+				var h2 = 0;
+				if (_self.options.fixedHeader){
+					h2 = -$("#refreshBoxWrapper").outerHeight() + $(_self.options.fixedHeader).outerHeight() + h - 10;// 10:shadow
+				} else {
+					h2 = -$("#refreshBoxWrapper").outerHeight() + h - 10;// 10:shadow
+				}
 				
 				//myConsoleLog("refreshBoxWrapper:"+h);
 				//$("#refreshBox").text(h2);
@@ -383,21 +387,25 @@
 		_hideRefreshBox = function(callback){
 			
 			//myConsoleLog("_hideRefreshBox()");
+			
+			var y = 0;
 			if (_self.options.fixedHeader){
-				var y = -$("#refreshBoxWrapper").outerHeight() + $(_self.options.fixedHeader).outerHeight() - 10;//10:shadow
-				
-				$("#refreshBoxWrapper:visible")
-					.one("webkitTransitionEnd transitionend",function(){
-						$("#refreshBoxWrapper").hide(0);
-						if (callback) callback();
-					})
-					.css({
-						"-webkit-transition":	"all 0.3s ease-out",
-						"-moz-transition":		"all 0.3s ease-out",
-						'-webkit-transform':	'translate3d(0,' + y + 'px, 0)',
-						'-moz-transform':		'translate(  0,' + y + 'px)'
-					});
+				y = -$("#refreshBoxWrapper").outerHeight() + $(_self.options.fixedHeader).outerHeight() - 10;//10:shadow
+			} else {
+				y = -$("#refreshBoxWrapper").outerHeight() - 10;//10:shadow
 			}
+			
+			$("#refreshBoxWrapper:visible")
+				.one("webkitTransitionEnd transitionend",function(){
+					$("#refreshBoxWrapper").hide(0);
+					if (callback) callback();
+				})
+				.css({
+					"-webkit-transition":	"all 0.3s ease-out",
+					"-moz-transition":		"all 0.3s ease-out",
+					'-webkit-transform':	'translate3d(0,' + y + 'px, 0)',
+					'-moz-transform':		'translate(  0,' + y + 'px)'
+				});
 		};
 		
 	}

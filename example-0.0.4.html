@@ -13,14 +13,17 @@
 <script type="text/javascript">
 $(function(){
 	$("#orgMenu").flickmenu({
-		menuOpen:    "a.btnNavOpen",
-		// プルダウンリフレッシュする？
-		isPullRefresh:	true,
-		onPullRefresh:	function(){
+		menuOpen:      "a.btnNavOpen",
+		// プルダウンリフレッシュするか
+		isPullRefresh: true,
+		onPullRefresh: function(){
 			alert("refresh!");
 		},
-		fixedHeader:	"#header",
-		isFlickMenu:    true
+		// ヘッダ固定するか
+		//fixedHeader:   "#header",
+		// フリックでメニューを開くか
+		// Androidでのフォーム入力時など、不具合が出る場合にはfalseで。
+		isFlickMenu:   true
 	});
 	
 	$("a.btnNavOpen.footerFixed").css({
@@ -71,6 +74,8 @@ $(function(){
   ↓下に引っ張るとPull to Refreshっぽく。<br />
   <br />
   ※jquery.flickmenu-0.0.2はAndroid2.2+で対応してます^^<br />
+  <br />
+  <a href="./">最新版はこちら(latest version)</a><br />
   <br />
   <a href="http://akihiro.jugem.jp/?eid=291">解説しているブログページはこちら<br />
   blog that is described.(ja)<br />
