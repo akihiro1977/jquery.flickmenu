@@ -31,6 +31,12 @@
 			menuOpen:    null,
 			isPullRefresh:  true,
 			onPullRefresh:  function(){},
+			textPullRefresh:
+				{
+					start:	'Pull to refresh',
+					ready:	'Release to refresh',
+					release:'loading...'
+				},
 			fixedHeader:	null,
 			isFlickMenu:    true
         }
@@ -63,6 +69,7 @@
 				width:					"100%",
 				"z-index":				99999
 			});
+			$("#fmBodyWrapper").css({ "padding-top": $(_self.options.fixedHeader).outerHeight(true) });
 		}
 		
 		// add pull2refresh box
@@ -86,7 +93,7 @@
 		if (this.element != null){
 			// copy menu
 			var menu = $(this.element).clone();
-			$(this.element).remove();
+			//$(this.element).remove();
 			$("#fmSlidemenuWrapper #fmSlidemenu").append(menu);
 			menu.show(0);
 		}
@@ -167,6 +174,9 @@
 		
 		$("#fmBodyWrapper").on("touchstart", function(e){
 			
+			// init onPullRefresh
+			isRefreshing = false;
+			
 			if (IS_MENUOPEN){
 				e.preventDefault();
 				return;
@@ -226,8 +236,6 @@
 			}
 			if (swipeMode==true){
 				
-				//myConsoleLog("swipeMode:true");
-				
 				$.flickmenu.prototype.slidemenuInit();
 				
 				var left = e.originalEvent.targetTouches[0].screenX - touchX;
@@ -247,32 +255,36 @@
 			if (_self.options.isPullRefresh==true && $(window).scrollTop()<=0 && distY<0){
 				// refreshBox
 				
+				$refreshBoxWrapper = $("#refreshBoxWrapper");
+				
 				var h = -parseInt(distY/3);
 				var h2 = 0;
 				if (_self.options.fixedHeader){
-					h2 = -$("#refreshBoxWrapper").outerHeight() + $(_self.options.fixedHeader).outerHeight() + h - 10;// 10:shadow
+					h2 = -$refreshBoxWrapper.outerHeight() + $(_self.options.fixedHeader).outerHeight() + h;// 10:shadow
 				} else {
-					h2 = -$("#refreshBoxWrapper").outerHeight() + h - 10;// 10:shadow
+					h2 = -$refreshBoxWrapper.outerHeight() + h;// 10:shadow
 				}
 				
-				//myConsoleLog("refreshBoxWrapper:"+h);
-				//$("#refreshBox").text(h2);
-				
 				if (h < 60){
-					$("#refreshBoxWrapper #refreshBox").text("Pull to refresh");
+					$("#refreshBoxWrapper #refreshBox").text(_self.options.textPullRefresh.start);
 					isCanRefresh = false;
 				} else {
-					$("#refreshBoxWrapper #refreshBox").text("Release to refresh");
+					$("#refreshBoxWrapper #refreshBox").text(_self.options.textPullRefresh.ready);
 					isCanRefresh = true;
 				}
 				
-				$("#refreshBoxWrapper").css({
+				/*
+				$refreshBoxWrapper.css({
 					"-webkit-transition":	"all 0.05s",
 					"-moz-transition":		"all 0.05s",
 					'-webkit-transform':	'translate3d(0,' + h2 + 'px, 0)',
 					'-moz-transform':		'translate(  0,' + h2 + 'px)'
 				});
-				$("#refreshBoxWrapper:not(:visible)").show(0);
+				*/
+				$refreshBoxWrapper.css({
+					top:	h2+"px"
+				});
+				$("#refreshBoxWrapper:hidden").show(0);
 				
 				
 				e.preventDefault();
@@ -283,8 +295,6 @@
 					_self.options.fixedHeader &&
 					( $(window).scrollTop()>$(_self.options.fixedHeader).outerHeight() || $(_self.options.fixedHeader).offset().top!=0 )
 				){
-					
-					//myConsoleLog("header hide");
 					
 					$(_self.options.fixedHeader)
 						.css({
@@ -311,14 +321,14 @@
 			if (_self.options.isPullRefresh){
 				if (isCanRefresh){
 					isRefreshing = true;
-					$("#refreshBoxWrapper #refreshBox").text("loading...");
+					$("#refreshBoxWrapper #refreshBox").text(_self.options.textPullRefresh.release);
 					
 					_self.options.onPullRefresh();
 					
 					setTimeout(function(){
 						isCanRefresh = false;
 						$("#fmBodyWrapper").trigger("touchend");
-					}, 1000);
+					}, 500);
 				} else 
 				if (swipeMode!=true){
 					_hideRefreshBox(function(){
@@ -384,20 +394,22 @@
 			}
 		};
 		
+		
 		_hideRefreshBox = function(callback){
 			
-			//myConsoleLog("_hideRefreshBox()");
+			$refreshBoxWrapper = $("#refreshBoxWrapper");
 			
 			var y = 0;
 			if (_self.options.fixedHeader){
-				y = -$("#refreshBoxWrapper").outerHeight() + $(_self.options.fixedHeader).outerHeight() - 10;//10:shadow
+				y = -$refreshBoxWrapper.outerHeight() + $(_self.options.fixedHeader).outerHeight();//10:shadow
 			} else {
-				y = -$("#refreshBoxWrapper").outerHeight() - 10;//10:shadow
+				y = -$refreshBoxWrapper.outerHeight();//10:shadow
 			}
 			
+			/*
 			$("#refreshBoxWrapper:visible")
 				.one("webkitTransitionEnd transitionend",function(){
-					$("#refreshBoxWrapper").hide(0);
+					$refreshBoxWrapper.hide(0);
 					if (callback) callback();
 				})
 				.css({
@@ -406,6 +418,20 @@
 					'-webkit-transform':	'translate3d(0,' + y + 'px, 0)',
 					'-moz-transform':		'translate(  0,' + y + 'px)'
 				});
+			*/
+			$refreshBoxWrapper
+				.animate(
+					{
+						top: y+"px"
+					}, {
+						duration: 250,
+						complete: function(){
+							$(this).hide(0);
+							if (callback) callback();
+						}
+					}
+				);
+
 		};
 		
 	}
