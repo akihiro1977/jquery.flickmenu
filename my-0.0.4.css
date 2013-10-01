@@ -1,0 +1,27 @@
+@charset "utf-8";
+ul, ol, li, dl, dt, dd {
+	display: block;
+	list-style-type: none;
+}
+a:link {
+	text-decoration: none;
+}
+
+#header {
+	background-color: #666666;
+	height: 44px;
+	color: #FFFFFF;
+}
+#header a.btnNavOpen {
+	margin: 5px;
+}
+
+
+#contents {
+	padding: 10px;
+	margin-top: 44px;
+}
+#orgMenu {
+	display: none;
+	margin-top: 10px;
+}
